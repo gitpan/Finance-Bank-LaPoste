@@ -1,3 +1,6 @@
+1.00 Fri Jun 25 11:40:18 CEST 2004
+     - adapt to www.videoposte.com layout
+
 0.02 Thu Jan  8 12:03:33 CET 2004
      - internal change (the Finance::Bank::LaPoste::Statement hash now contains the "year")
 

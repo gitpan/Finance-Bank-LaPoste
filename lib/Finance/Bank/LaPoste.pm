@@ -7,7 +7,7 @@ use HTTP::Cookies;
 use LWP::UserAgent;
 use HTML::Parser;
 
-our $VERSION = 0.02;
+our $VERSION = '1.00';
 
 # $Id: $
 # $Log: LaPoste.pm,v $
@@ -251,10 +251,20 @@ sub statements {
 	my ($year) = $html =~ /Solde\s+au\s+\d+\s+\S+\s+(20\d\d)/;
 	$self->{balance} ||= do {
 	    my ($balance) = $html =~ /Solde\s+au.*?:\s+(.*?)\s+euros/s;
+	    $balance =~ s/<.*>\s*//; # (since 24/06/2004) remove: </span><span class="soldeur">
 	    $normalize_number->($balance);
 	};
 	my $l = $parse_table->($html);
-	shift @$l if $l->[0][0] eq 'date'; # drop first line which contain columns title
+	if ($l->[0][0] eq 'date') { # old version
+	    # drop first line which contain columns title
+	    shift @$l
+	} else {
+	    # (since 24/06/2004), we need to drop some lines and some fields
+	    @$l = map {
+		my (undef, $date, $description, undef, $amount) = @$_;
+		$date =~ m!(\d+)/(\d+)! ? [ $date, $description, $amount ] : ();
+	    } @$l;
+	}
 
 	my $prev_month = 12;
 	[ map {
