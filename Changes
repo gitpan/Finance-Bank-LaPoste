@@ -1,3 +1,8 @@
+1.02 Thu Jan 20 11:13:05 CET 2005
+     - fix _get_cookie() which generated many redirects before giving up, causing some failure
+     - fix _list_accounts()
+     - fix ->as_string on a Statement
+
 1.01 Sat Jan  1 20:42:37 CET 2005
      - minor fix for setting the year of the statements at the beginning of a new year
        with no statements for this new year 

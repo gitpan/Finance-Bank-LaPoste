@@ -7,7 +7,7 @@ use HTTP::Cookies;
 use LWP::UserAgent;
 use HTML::Parser;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 # $Id: $
 # $Log: LaPoste.pm,v $
@@ -117,7 +117,7 @@ sub _get_cookie {
     my ($self) = @_;
     $self->{feedback}->("get cookie") if $self->{feedback};
     my $cookie_jar = HTTP::Cookies->new;
-    my $response = $self->{ua}->request(HTTP::Request->new(GET => $url1));
+    my $response = $self->{ua}->simple_request(HTTP::Request->new(GET => $url1));
     $cookie_jar->extract_cookies($response);
     $self->{ua}->cookie_jar($cookie_jar);
 }
@@ -140,7 +140,7 @@ sub _list_accounts {
 
     my $accounts = $parse_table->($response->content);
     map {
-	my ($account, $account_no, $balance) = @$_;
+	my ($account, $account_no, $balance) = grep { $_ ne '' } @$_;
 	if (ref $account) {
 	    $account->[0] =~ s/^- //;
 	    $account->[1] =~ s/OPE=16/OPE=32/;
@@ -316,7 +316,7 @@ sub description { $_[0]{description} }
 sub amount      { $_[0]{amount} }
 sub date        { 
     my ($self) = @_;
-    my $year = $self->{year} =~ /..(..)/; # only 2 digits for year
+    my ($year) = $self->{year} =~ /..(..)/; # only 2 digits for year
     "$year/$self->{month}/$self->{day}"
 }
 
