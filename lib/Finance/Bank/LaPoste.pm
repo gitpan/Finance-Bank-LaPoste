@@ -7,7 +7,7 @@ use HTTP::Cookies;
 use LWP::UserAgent;
 use HTML::Parser;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 # $Id: $
 # $Log: LaPoste.pm,v $
@@ -248,7 +248,7 @@ sub statements {
 	$response->is_success or die "can't access account $self->{name} statements\n" . $response->error_as_HTML;
 
 	my $html = $response->content;
-	my ($year) = $html =~ /Solde\s+au\s+\d+\s+\S+\s+(20\d\d)/;
+	my ($solde_month, $year) = $html =~ /Solde\s+au\s+\d+\s+(\S+)\s+(20\d\d)/;
 	$self->{balance} ||= do {
 	    my ($balance) = $html =~ /Solde\s+au.*?:\s+(.*?)\s+euros/s;
 	    $balance =~ s/<.*>\s*//; # (since 24/06/2004) remove: </span><span class="soldeur">
@@ -266,7 +266,7 @@ sub statements {
 	    } @$l;
 	}
 
-	my $prev_month = 12;
+	my $prev_month = $solde_month eq 'janvier' ? 1 : 12;
 	[ map {
 	    my ($date, $description, $amount) = @$_;
 	    my ($day, $month) = $date =~ m|(\d+)/(\d+)|;
