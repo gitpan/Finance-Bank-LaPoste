@@ -7,7 +7,7 @@ use HTTP::Cookies;
 use LWP::UserAgent;
 use HTML::Parser;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 # $Id: $
 # $Log: LaPoste.pm,v $
@@ -262,7 +262,7 @@ sub statements {
 	    my ($day, $month) = $date =~ m|(\d+)/(\d+)|;
 	    $year-- if $month > $prev_month;
 	    $prev_month = $month;
-	    Finance::Bank::LaPoste::Statement->new(day => $day, month => $month, date => "$year/$month/$day", description => $description, amount => $normalize_number->($amount));
+	    Finance::Bank::LaPoste::Statement->new(day => $day, month => $month, year => $year, description => $description, amount => $normalize_number->($amount));
 	} @$l ];
     };
     @{$self->{statements}};
@@ -302,9 +302,13 @@ sub new {
     bless \%statement, $class;
 }
 
-sub date        { my $s = $_[0]{date}; $s =~ s/..//; $s } # only 2 digits for year
 sub description { $_[0]{description} }
 sub amount      { $_[0]{amount} }
+sub date        { 
+    my ($self) = @_;
+    my $year = $self->{year} =~ /..(..)/; # only 2 digits for year
+    "$year/$self->{month}/$self->{day}"
+}
 
 sub as_string { 
     my ($self, $separator) = @_;

@@ -1,2 +1,5 @@
+0.02 Thu Jan  8 12:03:33 CET 2004
+     - internal change (the Finance::Bank::LaPoste::Statement hash now contains the "year")
+
 0.01 Wed Oct  8 11:00:07 CEST 2003
-     - Initial release
+     - initial release
