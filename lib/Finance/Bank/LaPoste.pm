@@ -7,7 +7,7 @@ use HTTP::Cookies;
 use LWP::UserAgent;
 use HTML::Parser;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 # $Id: $
 # $Log: LaPoste.pm,v $
@@ -148,7 +148,7 @@ sub _list_accounts {
 	        name => $account->[0],
 	        account_no => $account_no, 
 	        balance => $normalize_number->($balance),
-	        $account->[1] =~ /releve_(ccp|cne)\.html/ ? (url => $account->[1]) : (), 
+	        $account->[1] =~ /releve_(ccp|cne|cb)\.html/ ? (url => $account->[1]) : (), 
 	    };
 	} else { () }
     } @$accounts;
@@ -169,12 +169,14 @@ sub new {
 }
 
 sub default_account {
-    my ($self) = @_;
+    my ($self, $nb_ope, $account_type) = @_;
+    $nb_ope ||= 64;
+    $account_type ||= 'ccp';
     my $cpt = $self->{username} =~ /(...)(.*)/ && uc("$2$1");;
     Finance::Bank::LaPoste::Account->new($self, 
 					 name => 'COMPTE COURANT POSTAL', 
 					 account_no => $cpt, 
-					 url => "releve_ccp.html?NumCpt=$cpt&UNT=1&OPE=32");
+					 url => "releve_$account_type.html?NumCpt=$cpt&UNT=1&OPE=$nb_ope");
 }
 
 =pod
@@ -248,7 +250,10 @@ sub statements {
 	$response->is_success or die "can't access account $self->{name} statements\n" . $response->error_as_HTML;
 
 	my $html = $response->content;
-	my ($solde_month, $year) = $html =~ /Solde\s+au\s+\d+\s+(\S+)\s+(20\d\d)/;
+	my ($solde_month, $year) = 
+	  $html =~ /Solde\s+au\s+\d+\s+(\S+)\s+(20\d\d)/ ? ($1, $2) :
+	  $html =~ m!au \d\d/(\d\d)/(20\d\d)!;
+
 	$self->{balance} ||= do {
 	    my ($balance) = $html =~ /Solde\s+au.*?:\s+(.*?)\s+euros/s;
 	    $balance =~ s/<.*>\s*//; # (since 24/06/2004) remove: </span><span class="soldeur">
@@ -266,7 +271,7 @@ sub statements {
 	    } @$l;
 	}
 
-	my $prev_month = $solde_month eq 'janvier' ? 1 : 12;
+	my $prev_month = $solde_month eq 'janvier' || $solde_month eq '01' ? 1 : 12;
 	[ map {
 	    my ($date, $description, $amount) = @$_;
 	    my ($day, $month) = $date =~ m|(\d+)/(\d+)|;
