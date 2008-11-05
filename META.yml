@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Finance-Bank-LaPoste
-version:             4.00
+version:             5.00
 abstract:             Check your "La Poste" accounts from Perl
 license:             ~
 author:              
