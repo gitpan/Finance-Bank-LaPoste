@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Finance-Bank-LaPoste
-version:            7.03
+version:            7.03.1
 abstract:            Check your "La Poste" accounts from Perl
 author:
     - Pascal Pixel Rigaux <pixel@rigaux.org>
@@ -11,8 +11,11 @@ configure_requires:
 build_requires:
     ExtUtils::MakeMaker:  0
 requires:
-    HTML::Parser:   0
-    HTTP::Cookies:  0
+    Digest::MD5:     0
+    HTML::Form:      0
+    HTML::Parser:    0
+    HTTP::Cookies:   0
+    LWP::UserAgent:  0
 no_index:
     directory:
         - t
